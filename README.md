@@ -13,7 +13,19 @@ OCI Network Discovery (oci-net-disco) is a small tool that searches for VNICs (V
 
 ## Usage
 
-```python main.py [-c COMPARMENT_OCID][-s SUBNET_OCID][-p PROFILE][--ip|--dt]```
+```python disco.py [-c COMPARMENT_OCID][-s SUBNET_OCID][-p PROFILE][--ip|--dt]```
+
+Get All VNICs:
+```python disco.py```
+
+Get All VNICs on subnet _foo_:
+```python disco.py -s foo```
+
+Get all VNICs in compartment _bar_:
+```python disco.py -c bar```
+
+Get all VNICs in compartment _bar_ on subnet _foo_:
+```python disco.py -s foo -c bar```
 
 ### Inputs
 
