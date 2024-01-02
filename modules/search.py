@@ -17,21 +17,19 @@ class Search:
         self.log.debug(f'Initialized Search object: {self}')
 
     def get_inventory(self) -> list[dict]:
-        self.log.info('Returning search results')
+        self.log.info(f'Returning search results -- Found {len(self.inventory)} items')
         return self.inventory
 
-    def search_vnics(self, **kwargs):
+    def search_vnics(self, compartment=None, subnet=None, **kwargs):
         self.log.info('Searching for VNICs')
         search = resource_search.models.StructuredSearchDetails(
             type = 'Structured',
-            query = 'query vnic resources'
+            # Return allAdditionalFields required for extracting subnet
+            query = 'query vnic resources return allAdditionalFields'
         )
-        if 'compartment' in kwargs:
-            search.query += f' in compartment {kwargs.get("compartment")}'
+        if compartment:
+            search.query += f" where compartmentId = '{compartment}'"
         self.log.debug(f'Search Details: {search}')
-
-        # Return additional fields required for script
-        search.query += f' return allAdditionalFields'
 
         response = pagination.list_call_get_all_results(
             self.client.search_resources,
@@ -39,6 +37,12 @@ class Search:
             )
         self.log.debug(Utilities.print_response_metadata(response))
         self.inventory = to_dict(response.data)
+
+        # If subnet is provided we will need to filter results because
+        # search will not include additionalDetails fields as valid targets
+        # of the 'where' clause
+        if subnet:
+            self.filter_search_results(subnetId=subnet)
     
     # Convenience method for when only OCIDs are required
     def search_vnics_ids(self, **kwargs):
@@ -54,17 +58,25 @@ class Search:
         self.log.info('Filtering results')
         self.log.debug(f'Filtering parameters: {kwargs}')
         new_inventory = []
+        
+        # Nested fields -- Unable to loop easily
+        subnetId = kwargs.pop('subnetId', None)
 
         # Main loop going over items in inventory
         for item in self.inventory:
+            # Start out False and flip to True if any match
+            # i.e. functions like an OR statement
             include = False
 
-            # Field subnetId nested in additional_details field - Doing this manually
-            if 'subnetId' in kwargs:
-                pass
+            if subnetId:
+                if item['additional_details']['subnetId'] == subnetId:
+                    include = True
+
 
             for key, value in kwargs.items():
                 if key in item and item[key] == value:
-                    new_inventory.append(item)
+                    include = True
+
+            if include: new_inventory.append(item)
 
         self.inventory = new_inventory

@@ -48,26 +48,6 @@ class Utilities:
 
         return client
     
-    # PROBABLY DEPRECATED
-    # Will will return a list of responses with unknown data fields and let the caller
-    # sort out the data
-    @staticmethod
-    def paginate(client_method: callable, *args, **kwargs) -> list[Response]:
-        responses = [client_method(*args, **kwargs)]
-        log.debug(Utilities.print_response_metadata(responses[-1]))
-        if responses[-1].status != 200:
-            log.error(f'Response status {responses[-1].status} during {client_method}\n{responses[-1].data}')
-
-        # Keep looping while there are more pages
-        while responses[-1].has_next_page:
-            response = client_method(*args, page=responses[-1].next_page, **kwargs)
-            responses.append(response)
-            log.debug(Utilities.print_response_metadata(response))
-            if response.status != 200:
-                log.error(f'Response status {response.status} during {client_method}\n{response.data}')
-
-        log.info(f'Returned {len(responses)} Response objects')
-        return responses
     
     @staticmethod
     def create_signer(profile: str, instance_principal: bool, delegation_token: bool):
