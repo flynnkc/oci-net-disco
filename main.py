@@ -21,9 +21,7 @@ def main():
                         help='Use Delegation Token authnetication')
     parser.add_argument('-p', '--profile', help='Profile to use from config file \
                         -- Defaults to DEFAULT', default='DEFAULT')
-    #parser.add_argument('--config', help='Config file location',
-    #                    default='~/.oci/config')
-    parser.add_argument('--subnet', help='OCID of Subnet to scan')
+    parser.add_argument('-s', '--subnet', help='OCID of Subnet to scan')
     args = parser.parse_args()
 
     # Configuration and other overhead
