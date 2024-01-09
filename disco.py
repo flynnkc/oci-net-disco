@@ -5,8 +5,8 @@ import argparse
 import json
 
 from oci.config import from_file
-from modules.utils import Utilities
-from modules.search import Search
+from modules import Utilities
+from modules import Search
 
 log = None
 
